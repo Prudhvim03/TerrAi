@@ -1,5 +1,3 @@
-# prompts/prompts.py
-
 MAIN_TITLE = "🌾 Terrคi: The Futuristic AI Farming Guide"
 SUBTITLE = "Empowering Indian farmers with AI, real-time insights, and smart agriculture innovations"
 
