@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+.stApp {
+    background: linear-gradient(135deg, #fffde7 0%, #e8f5e9 100%);
+    color: #37474f;
+}
+.futuristic-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: -8px;
+}
+.main-title {
+    text-align: center;
+    color: #689f38;
+    font-size: 2.7rem;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    text-shadow: 0 0 10px #fbc02d, 0 0 40px #fbc02d44;
+    margin-bottom: 0.5rem;
+}
+.subtitle {
+    text-align: center;
+    color: #8d6e63;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    font-family: 'Orbitron', sans-serif;
+}
+.stChatInput input {
+    font-size: 1.1rem !important;
+    background: rgba(255, 224, 130, 0.13);
+    border: 1.5px solid #689f38;
+    border-radius: 8px;
+    color: #37474f;
+}
+.stButton>button {
+    background: linear-gradient(90deg, #fbc02d 0%, #689f38 100%);
+    color: #fffde7;
+    font-weight: bold;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px #8d6e6344;
+}
+.stMarkdown {
+    background: rgba(232, 245, 233, 0.7);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 24px #fbc02d22;
+}
+.stChatMessage > div {
+    background: #fffde7 !important;
+    border-radius: 12px !important;
+    color: #37474f !important;
+    padding: 16px !important;
+    font-size: 1.07rem !important;
+    line-height: 1.6 !important;
+    box-shadow: 0 1px 8px #fbc02d22;
+    margin-bottom: 10px;
+    border: 1.5px solid #fbc02d44;
+}
+.stChatMessage.stChatMessage-user > div {
+    background: #ffe082 !important;
+    color: #689f38 !important;
+    font-weight: 600;
+}
