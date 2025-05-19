@@ -9,13 +9,10 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 llm = ChatGroq(model="llama3-70b-8192", api_key=GROQ_API_KEY)
 
 def get_rag_answer(question, chat_history=None):
-    # 1. Retrieve from vector DB (semantic search)
     vectordb = get_vector_db()
     docs = vectordb.similarity_search(question, k=2)
     vector_context = "\n".join([doc.page_content for doc in docs]) if docs else ""
-    # 2. Tavily web search
     web_info = tava_search(question)
-    # 3. Compose prompt
     prompt = SYSTEM_PROMPT
     if vector_context:
         prompt += f"\n\nRelevant previous knowledge:\n{vector_context}"
