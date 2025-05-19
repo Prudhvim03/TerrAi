@@ -14,7 +14,6 @@ load_dotenv()
 with open("static/custom.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-# --- Logo (SVG) ---
 futuristic_logo_svg = """<svg width="72" height="72" ...> ... </svg>"""  # Use your SVG from paste.txt
 
 st.markdown(f'<div class="futuristic-logo">{futuristic_logo_svg}</div>', unsafe_allow_html=True)
