@@ -14,11 +14,9 @@ TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 llm = ChatGroq(model="llama3-70b-8192", api_key=GROQ_API_KEY)
 tavily_search = TavilySearch(api_key=TAVILY_API_KEY, max_results=3)
 
-# --- Branding & CSS ---
-with open("static/custom.css") as f:
-    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
-futuristic_logo_svg = """<svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+# --- Logo & CSS ---
+futuristic_logo_svg = """
+<svg width="72" height="72" viewBox="0 0 72 72" fill="none">
   <defs>
     <radialGradient id="soil" cx="50%" cy="50%" r="50%">
       <stop offset="0%" stop-color="#a1887f" stop-opacity="0.8"/>
@@ -48,7 +46,75 @@ futuristic_logo_svg = """<svg width="72" height="72" viewBox="0 0 72 72" fill="n
   <text x="36" y="15.5" font-size="2.5" text-anchor="middle" fill="#388e3c" font-family="Orbitron">AI</text>
 </svg>
 """
-
+st.markdown("""
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+        .stApp {
+            background: linear-gradient(135deg, #fffde7 0%, #e8f5e9 100%);
+            color: #37474f;
+        }
+        .futuristic-logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: -8px;
+        }
+        .main-title {
+            text-align: center;
+            color: #689f38;
+            font-size: 2.7rem;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            text-shadow: 0 0 10px #fbc02d, 0 0 40px #fbc02d44;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            text-align: center;
+            color: #8d6e63;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            font-family: 'Orbitron', sans-serif;
+        }
+        .stChatInput input {
+            font-size: 1.1rem !important;
+            background: rgba(255, 224, 130, 0.13);
+            border: 1.5px solid #689f38;
+            border-radius: 8px;
+            color: #37474f;
+        }
+        .stButton>button {
+            background: linear-gradient(90deg, #fbc02d 0%, #689f38 100%);
+            color: #fffde7;
+            font-weight: bold;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px #8d6e6344;
+        }
+        .stMarkdown {
+            background: rgba(232, 245, 233, 0.7);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 24px #fbc02d22;
+        }
+        .stChatMessage > div {
+            background: #fffde7 !important;
+            border-radius: 12px !important;
+            color: #37474f !important;
+            padding: 16px !important;
+            font-size: 1.07rem !important;
+            line-height: 1.6 !important;
+            box-shadow: 0 1px 8px #fbc02d22;
+            margin-bottom: 10px;
+            border: 1.5px solid #fbc02d44;
+        }
+        .stChatMessage.stChatMessage-user > div {
+            background: #ffe082 !important;
+            color: #689f38 !important;
+            font-weight: 600;
+        }
+    </style>
+""", unsafe_allow_html=True)
 st.markdown(f'<div class="futuristic-logo">{futuristic_logo_svg}</div>', unsafe_allow_html=True)
 st.markdown('<div class="main-title">🌾 Terrคi: The Futuristic AI Farming Guide</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">Empowering Indian farmers with AI, real-time insights, and smart agriculture innovations</div>', unsafe_allow_html=True)
@@ -86,32 +152,20 @@ def is_farming_question(question):
     q = question.lower()
     return any(word in q for word in keywords)
 
-def get_rag_answer(question, use_tavily=False):
+def get_rag_answer(question):
     system_prompt = (
         "You are an Indian agricultural expert specializing in farming. "
         "Give practical, region-specific, step-by-step advice using both your knowledge and the latest information from trusted Indian agricultural sources. "
         "Always explain in clear, simple language. If possible, mention local varieties, climate, and sustainable practices. "
         "If you don't know, say so and suggest how to find out."
     )
-    web_snippets = ""
-    if use_tavily:
-        tavily_result = tavily_search.invoke({"query": question})
-        if tavily_result and "results" in tavily_result:
-            for idx, result in enumerate(tavily_result["results"], 1):
-                web_snippets += f"\nSource {idx}: {result.get('title', '')}\n{result.get('content', '')}\nURL: {result.get('url', '')}\n"
-    prompt_with_web = system_prompt + (f"\n\nWeb search results:\n{web_snippets}" if web_snippets else "")
     messages = [
-        SystemMessage(content=prompt_with_web),
+        SystemMessage(content=system_prompt),
         HumanMessage(content=question)
     ]
     response = llm.invoke(messages)
     answer = response.content.strip()
-    references = ""
-    if web_snippets:
-        references = "\n\n**Top Sources:**\n"
-        for idx, result in enumerate(tavily_result["results"], 1):
-            references += f"- [{result.get('title', 'Source')}]({result.get('url', '')})\n"
-    return f"**AI Guidance:**\n{answer}{references}"
+    return f"**AI Guidance:**\n{answer}"
 
 def get_self_qa(question):
     prompt = (
@@ -127,74 +181,47 @@ def get_self_qa(question):
     response = llm.invoke(messages)
     return response.content.strip()
 
-# --- Session state ---
+# --- Chat Session State ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# --- Input row with icons ---
-st.markdown('<div class="input-row">', unsafe_allow_html=True)
-
-uploaded_file = st.file_uploader("", type=["jpg", "png", "pdf"], label_visibility="collapsed", key="file-upload")
-
-col1, col2, col3, col4 = st.columns([8,1,1,1])
-
-with col1:
-    user_text = st.text_input(
-        "Ask about farming, soil, pests, irrigation, or anything in Indian agriculture…",
-        key="chat-input",
-        label_visibility="collapsed"
-    )
-
-with col2:
-    mic_clicked = st.button("🎤", help="Dictate", key="mic-btn")
-
-with col3:
-    tavily_clicked = st.button("🔍", help="Web Search", key="tavily-btn")
-
-with col4:
-    st.markdown('<span title="Attach file">📎</span>', unsafe_allow_html=True)
-
-st.markdown('</div>', unsafe_allow_html=True)
-
-# --- Handle Input Actions ---
-if mic_clicked:
-    # In production: integrate with your voice agent!
-    st.session_state['messages'].append({"role": "user", "content": "[Voice dictation not implemented in browser demo]"})
-
-if tavily_clicked and user_text:
-    response = get_rag_answer(user_text, use_tavily=True)
-    st.session_state['messages'].append({"role": "user", "content": user_text})
-    st.session_state['messages'].append({"role": "assistant", "content": response})
-
-if user_text and not tavily_clicked and not mic_clicked:
-    st.session_state['messages'].append({"role": "user", "content": user_text})
-    # Meta/self QA/farming logic
-    if is_meta_query(user_text):
-        response = handle_meta_query()
-    elif is_selfqa_query(user_text):
-        prev_user_msg = next((m["content"] for m in reversed(st.session_state['messages'][:-1]) if m["role"] == "user"), None)
-        if prev_user_msg:
-            response = get_self_qa(prev_user_msg)
-        else:
-            response = "Please ask a farming question first, then I can suggest more questions."
-    elif not is_farming_question(user_text):
-        response = (
-            "🙏 Sorry, I can only answer questions related to farming, agriculture, or agri-studies. "
-            "If you are a farmer, student, or agriculturalist, please ask about crops, soil, weather, pest management, agri-careers, etc."
-        )
-    else:
-        response = get_rag_answer(user_text)
-    st.session_state['messages'].append({"role": "assistant", "content": response})
-
-if uploaded_file:
-    # In production: call your image/PDF agent here!
-    img_result = f"File '{uploaded_file.name}' received. (Image/PDF analysis coming soon!)"
-    st.session_state['messages'].append({"role": "assistant", "content": img_result})
-
-# --- Display Chat Messages ---
-for message in st.session_state.get('messages', []):
+for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
+
+prompt = st.chat_input("Ask about farming, soil, pests, irrigation, or anything in Indian agriculture…")
+
+if prompt:
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    with st.chat_message("assistant"):
+        if is_meta_query(prompt):
+            response = handle_meta_query()
+            st.markdown(response)
+            st.session_state.messages.append({"role": "assistant", "content": response})
+        elif is_selfqa_query(prompt):
+            prev_user_msg = next((m["content"] for m in reversed(st.session_state.messages[:-1]) if m["role"] == "user"), None)
+            if prev_user_msg:
+                st.markdown("**Other questions you may have:**")
+                self_qa = get_self_qa(prev_user_msg)
+                st.markdown(self_qa)
+                st.session_state.messages.append({"role": "assistant", "content": self_qa})
+            else:
+                st.markdown("Please ask a farming question first, then I can suggest more questions.")
+        elif not is_farming_question(prompt):
+            response = (
+                "🙏 Sorry, I can only answer questions related to farming, agriculture, or agri-studies. "
+                "If you are a farmer, student, or agriculturalist, please ask about crops, soil, weather, pest management, agri-careers, etc."
+            )
+            st.markdown(response)
+            st.session_state.messages.append({"role": "assistant", "content": response})
+        else:
+            with st.spinner("Consulting AI experts and searching the latest info..."):
+                rag_answer = get_rag_answer(prompt)
+                st.markdown(rag_answer)
+                st.session_state.messages.append({"role": "assistant", "content": rag_answer})
 
 # --- Footer ---
 st.markdown(
