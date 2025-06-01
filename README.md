@@ -1,4 +1,5 @@
 #  Terrคi: The Futuristic AI Farming Guide 
+
 (This is an intro model only; the final project is private for some privacy concerns.)
 
 
