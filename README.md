@@ -1,4 +1,5 @@
-#  Terrคi: The Futuristic AI Farming Guide (This is an intro model only, the complete final project is in private for some privacy )
+#  Terrคi: The Futuristic AI Farming Guide 
+(This is an intro model only; the final project is private for some privacy concerns.)
 
 
 Empowering Indian farmers with AI, real-time insights, and smart agriculture innovations.
